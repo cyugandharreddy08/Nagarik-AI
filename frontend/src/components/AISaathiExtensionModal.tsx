@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { playTactileClick, playActionSuccess } from '../utils/civicSoundEffects';
 import {
   Download, ExternalLink, ShieldCheck, CheckCircle2,
   Copy, Check, X, Sparkles, Monitor, ArrowRight,
@@ -31,6 +32,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopy = (key: string, text: string) => {
+    playActionSuccess();
     navigator.clipboard.writeText(text);
     setCopiedStep(key);
     setTimeout(() => setCopiedStep(null), 2000);
@@ -38,7 +40,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#121418] border border-[#f2ca50]/40 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#121418] border border-[#ffb692]/40 rounded-2xl overflow-hidden shadow-2xl">
         {/* Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#22262f] bg-[#16191f]">
           <div className="flex items-center gap-3">
@@ -50,7 +52,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                 <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   AI Saathi — Civic Browser Guardian
                 </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f2ca50]/20 text-[#f2ca50] border border-[#f2ca50]/40">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ffb692]/20 text-[#ffb692] border border-[#ffb692]/40">
                   Chrome Extension
                 </span>
               </div>
@@ -64,13 +66,13 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
             <a
               href="./nagarik-extension.zip"
               download
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#d4af37] to-[#f2ca50] text-[#241a00] font-bold text-xs hover:opacity-95 shadow-sm transition-all"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#E58C5C] to-[#ffb692] text-[#0B0C1E] font-bold text-xs hover:opacity-95 shadow-sm transition-all"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download ZIP</span>
             </a>
             <button
-              onClick={onClose}
+              onClick={() => { playTactileClick(); onClose(); }}
               className="p-1.5 rounded-lg text-[#8F93B5] hover:text-white hover:bg-[#22262f] transition-colors"
             >
               <X className="w-5 h-5" />
@@ -81,10 +83,10 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
         {/* Tab Controls */}
         <div className="flex items-center border-b border-[#22262f] bg-[#101216] px-6 text-xs font-semibold">
           <button
-            onClick={() => setActiveTab('simulator')}
+            onClick={() => { playTactileClick(); setActiveTab('simulator'); }}
             className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
               activeTab === 'simulator'
-                ? 'border-[#f2ca50] text-[#f2ca50]'
+                ? 'border-[#ffb692] text-[#ffb692]'
                 : 'border-transparent text-[#8F93B5] hover:text-white'
             }`}
           >
@@ -93,10 +95,10 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('install')}
+            onClick={() => { playTactileClick(); setActiveTab('install'); }}
             className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
               activeTab === 'install'
-                ? 'border-[#f2ca50] text-[#f2ca50]'
+                ? 'border-[#ffb692] text-[#ffb692]'
                 : 'border-transparent text-[#8F93B5] hover:text-white'
             }`}
           >
@@ -105,10 +107,10 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('architecture')}
+            onClick={() => { playTactileClick(); setActiveTab('architecture'); }}
             className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
               activeTab === 'architecture'
-                ? 'border-[#f2ca50] text-[#f2ca50]'
+                ? 'border-[#ffb692] text-[#ffb692]'
                 : 'border-transparent text-[#8F93B5] hover:text-white'
             }`}
           >
@@ -146,7 +148,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                           type="text"
                           readOnly
                           value={simAadhaarDetected ? simAadhaarMasked : '5482-1920-4819'}
-                          className="w-full bg-[#0c0e11] border border-[#B8643A]/40 rounded-lg px-3 py-1.5 text-xs text-[#f2ca50] font-mono"
+                          className="w-full bg-[#0c0e11] border border-[#B8643A]/40 rounded-lg px-3 py-1.5 text-xs text-[#ffb692] font-mono"
                         />
                         <span className="absolute right-2.5 top-1.5 flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
                           <ShieldCheck className="w-3 h-3" />
@@ -171,7 +173,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                         rows={3}
                         value={simProblem}
                         onChange={(e) => setSimProblem(e.target.value)}
-                        className="w-full mt-1 bg-[#0c0e11] border border-[#22262f] rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-[#f2ca50]/50"
+                        className="w-full mt-1 bg-[#0c0e11] border border-[#22262f] rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-[#ffb692]/50"
                       />
                     </div>
                   </div>
@@ -183,7 +185,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                     </span>
                     <button
                       onClick={() => setSimStep(prev => (prev % 3) + 1)}
-                      className="text-[#f2ca50] hover:underline"
+                      className="text-[#ffb692] hover:underline"
                     >
                       Cycle Next Step →
                     </button>
@@ -193,7 +195,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                 {/* Features Highlight Grid */}
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-3 rounded-lg bg-[#16191f] border border-[#22262f] space-y-1">
-                    <span className="text-[#f2ca50] font-bold flex items-center gap-1">
+                    <span className="text-[#ffb692] font-bold flex items-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       Anti-Phishing
                     </span>
@@ -214,13 +216,13 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
               </div>
 
               {/* Right Column: Simulated AI Saathi Sidepanel (as seen in Chrome) */}
-              <div className="md:col-span-6 flex flex-col rounded-2xl bg-[#0c0e11] border border-[#f2ca50]/40 overflow-hidden shadow-xl">
+              <div className="md:col-span-6 flex flex-col rounded-2xl bg-[#0c0e11] border border-[#ffb692]/40 overflow-hidden shadow-xl">
                 {/* Sidepanel Top Header */}
                 <div className="flex items-center justify-between p-3.5 border-b border-[#22262f] bg-[#16191f]">
                   <div className="flex items-center gap-2">
                     <NagarikEmblem className="w-5 h-5" size={20} />
                     <span className="text-xs font-bold text-white tracking-wide">
-                      AI Saathi <span className="text-[#f2ca50]">Sidepanel</span>
+                      AI Saathi <span className="text-[#ffb692]">Sidepanel</span>
                     </span>
                   </div>
 
@@ -229,7 +231,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                       onClick={() => setSimVoiceActive(v => !v)}
                       className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
                         simVoiceActive
-                          ? 'bg-[#f2ca50]/20 text-[#f2ca50] border-[#f2ca50]/40'
+                          ? 'bg-[#ffb692]/20 text-[#ffb692] border-[#ffb692]/40'
                           : 'bg-white/5 text-[#8F93B5] border-transparent'
                       }`}
                     >
@@ -245,13 +247,13 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                 <div className="p-4 space-y-4 flex-1 text-xs">
                   <div className="flex items-center justify-between text-[11px] text-[#8F93B5]">
                     <span className="font-semibold text-white">Step {simStep} of 3: Civic Triage</span>
-                    <span className="text-[#f2ca50] font-mono">{simStep === 1 ? '33%' : simStep === 2 ? '66%' : '100%'}</span>
+                    <span className="text-[#ffb692] font-mono">{simStep === 1 ? '33%' : simStep === 2 ? '66%' : '100%'}</span>
                   </div>
 
                   {/* Progress Bar */}
                   <div className="w-full bg-[#1e2023] h-1.5 rounded-full overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-[#d4af37] to-[#f2ca50] h-full transition-all duration-300"
+                      className="bg-gradient-to-r from-[#E58C5C] to-[#ffb692] h-full transition-all duration-300"
                       style={{ width: `${(simStep / 3) * 100}%` }}
                     />
                   </div>
@@ -259,7 +261,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                   {/* Dynamic Wizard Step Content */}
                   {simStep === 1 && (
                     <div className="p-3 rounded-xl bg-[#16191f] border border-[#22262f] space-y-2">
-                      <div className="text-[#f2ca50] font-bold text-xs flex items-center gap-1.5">
+                      <div className="text-[#ffb692] font-bold text-xs flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Autofill Verification</span>
                       </div>
@@ -269,7 +271,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                       <div className="pt-2 flex gap-2">
                         <button
                           onClick={() => setSimStep(2)}
-                          className="flex-1 py-1.5 rounded-lg bg-[#f2ca50] text-[#241a00] font-bold text-xs hover:opacity-95"
+                          className="flex-1 py-1.5 rounded-lg bg-[#ffb692] text-[#0B0C1E] font-bold text-xs hover:opacity-95"
                         >
                           Confirm Classification
                         </button>
@@ -288,7 +290,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                       </p>
                       <button
                         onClick={() => setSimStep(3)}
-                        className="w-full py-1.5 rounded-lg bg-[#f2ca50] text-[#241a00] font-bold text-xs hover:opacity-95"
+                        className="w-full py-1.5 rounded-lg bg-[#ffb692] text-[#0B0C1E] font-bold text-xs hover:opacity-95"
                       >
                         Proceed to Portal Review
                       </button>
@@ -319,7 +321,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                     download
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs border border-white/10 transition-colors"
                   >
-                    <Download className="w-3.5 h-3.5 text-[#f2ca50]" />
+                    <Download className="w-3.5 h-3.5 text-[#ffb692]" />
                     <span>Download nagarik-extension.zip (365 KB)</span>
                   </a>
                 </div>
@@ -332,14 +334,14 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
             <div className="space-y-4 text-xs">
               <div className="p-4 rounded-xl bg-[#16191f] border border-[#22262f] space-y-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Download className="w-4 h-4 text-[#f2ca50]" />
+                  <Download className="w-4 h-4 text-[#ffb692]" />
                   <span>How to Load AI Saathi Extension into Google Chrome or Microsoft Edge</span>
                 </h3>
 
                 <div className="space-y-3 pt-2">
                   {/* Step 1 */}
                   <div className="p-3 rounded-lg bg-[#0c0e11] border border-[#22262f] flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#f2ca50] text-[#241a00] font-bold flex items-center justify-center shrink-0 text-xs">
+                    <span className="w-6 h-6 rounded-full bg-[#ffb692] text-[#0B0C1E] font-bold flex items-center justify-center shrink-0 text-xs">
                       1
                     </span>
                     <div className="flex-1 space-y-1">
@@ -351,7 +353,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                         <a
                           href="./nagarik-extension.zip"
                           download
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f2ca50] text-[#241a00] font-bold text-xs hover:opacity-95"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ffb692] text-[#0B0C1E] font-bold text-xs hover:opacity-95"
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Download nagarik-extension.zip</span>
@@ -362,7 +364,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
 
                   {/* Step 2 */}
                   <div className="p-3 rounded-lg bg-[#0c0e11] border border-[#22262f] flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#f2ca50] text-[#241a00] font-bold flex items-center justify-center shrink-0 text-xs">
+                    <span className="w-6 h-6 rounded-full bg-[#ffb692] text-[#0B0C1E] font-bold flex items-center justify-center shrink-0 text-xs">
                       2
                     </span>
                     <div className="flex-1 space-y-1">
@@ -370,7 +372,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
                         <h4 className="font-bold text-white">Open Chrome Extensions Manager</h4>
                         <button
                           onClick={() => handleCopy('url', 'chrome://extensions')}
-                          className="text-[11px] text-[#f2ca50] flex items-center gap-1 hover:underline"
+                          className="text-[11px] text-[#ffb692] flex items-center gap-1 hover:underline"
                         >
                           {copiedStep === 'url' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                           <span>{copiedStep === 'url' ? 'Copied' : 'Copy URL'}</span>
@@ -384,7 +386,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
 
                   {/* Step 3 */}
                   <div className="p-3 rounded-lg bg-[#0c0e11] border border-[#22262f] flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#f2ca50] text-[#241a00] font-bold flex items-center justify-center shrink-0 text-xs">
+                    <span className="w-6 h-6 rounded-full bg-[#ffb692] text-[#0B0C1E] font-bold flex items-center justify-center shrink-0 text-xs">
                       3
                     </span>
                     <div className="flex-1 space-y-1">
@@ -408,12 +410,12 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
               <div className="p-4 rounded-xl bg-[#16191f] border border-[#22262f] space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-white">Manifest V3 File Structure & Host Permissions</h3>
-                  <span className="text-[11px] font-mono text-[#f2ca50]">Version 1.0.1</span>
+                  <span className="text-[11px] font-mono text-[#ffb692]">Version 1.0.1</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div className="p-3 rounded-lg bg-[#0c0e11] border border-[#22262f] space-y-1 font-mono text-[11px]">
-                    <div className="text-[#f2ca50] font-bold">Extension Package Tree:</div>
+                    <div className="text-[#ffb692] font-bold">Extension Package Tree:</div>
                     <div className="text-[#8F93B5] space-y-0.5">
                       <div>📁 extension/</div>
                       <div className="pl-3">├── 📄 manifest.json (V3)</div>
@@ -448,7 +450,7 @@ export const AISaathiExtensionModal: React.FC<AISaathiExtensionModalProps> = ({
             UIDAI Aadhaar Redacted • Manifest V3 Native Sidepanel
           </span>
           <button
-            onClick={onClose}
+            onClick={() => { playTactileClick(); onClose(); }}
             className="px-4 py-1.5 rounded-lg bg-[#22262f] text-white hover:bg-[#2b303b] font-medium transition-colors"
           >
             Close

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { playTactileClick, playActionSuccess } from '../utils/civicSoundEffects';
 import {
   X, Check, AlertTriangle, Trash2, Eye,
   Languages, Shield, CheckCircle, Sliders
@@ -276,7 +277,7 @@ export const CivicSettingsModal: React.FC<CivicSettingsModalProps> = ({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => { playTactileClick(); onClose(); }}
             className="p-2 rounded-xl text-[#8F93B5] hover:text-[#E8E9F2] hover:bg-[#1a1c1f] transition-colors"
             title="Close Settings"
             aria-label="Close Settings"

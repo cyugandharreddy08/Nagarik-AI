@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================================================== */
+/* NAGARIK AI - LIGHT SAFFRON PALETTE (Kasireddy-Raghavendra Design System)  */
+/* ========================================================================== */
+
 :root {
   --surface-container-lowest: #0c0e11;
   --surface-dim: #111316;
@@ -12,17 +16,21 @@
   --surface-container: #1a1c1f;
   --surface-container-high: #22252a;
   --surface-container-highest: #282a2e;
+
+  /* Kasireddy-Raghavendra Light Saffron & Sovereign Tokens */
   --primary: #E58C5C;
   --primary-container: #B8643A;
   --secondary: #ffb692;
+  --secondary-fixed: #ffdbcb;
+  --on-secondary-fixed: #341100;
   --tertiary: #c5cfdb;
   --on-surface: #E8E9F2;
   --on-surface-variant: #8F93B5;
   --on-primary: #0B0C1E;
   --outline-variant: #282a2e;
   --border-terra: #B8643A;
-  --gold: #f2ca50;
-  --gold-container: #d4af37;
+  --saffron-light: #ffb692;
+  --saffron-primary: #E58C5C;
 
   --text-on-slate: #E8E9F2;
   --muted-on-slate: #8F93B5;
@@ -53,6 +61,16 @@ html {
   height: -webkit-fill-available;
 }
 
+/* Light Saffron Text Selection (Kasireddy-Raghavendra Design) */
+::selection {
+  background-color: #ffb692 !important;
+  color: #0B0C1E !important;
+}
+::-moz-selection {
+  background-color: #ffb692 !important;
+  color: #0B0C1E !important;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -74,6 +92,11 @@ body {
   min-height: -webkit-fill-available;
   position: fixed;
   overflow: hidden;
+  background-image: 
+    radial-gradient(ellipse at 85% 0%, rgba(255, 182, 146, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 15% 100%, rgba(229, 140, 92, 0.14) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, rgba(26, 29, 36, 0.8) 0%, transparent 70%);
+  background-attachment: fixed;
 }
 
 #root {
@@ -85,17 +108,7 @@ body {
   position: relative;
 }
 
-/* Subtle sovereign ambient background */
-body {
-  background-image: 
-    radial-gradient(ellipse at 85% 0%, rgba(242, 202, 80, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 15% 100%, rgba(184, 100, 58, 0.12) 0%, transparent 55%),
-    radial-gradient(circle at 50% 50%, rgba(26, 29, 36, 0.8) 0%, transparent 70%);
-  background-attachment: fixed;
-  overflow: hidden;
-}
-
-/* Scrollbars matching Nagarik_AI_frontend */
+/* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -108,10 +121,9 @@ body {
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #373b45;
+  background: #ffb692;
 }
 
-/* Mobile smooth touch scrolling */
 .scrollbar-thin {
   -webkit-overflow-scrolling: touch;
 }
@@ -124,50 +136,119 @@ body {
   font-family: 'Space Grotesk', monospace;
 }
 
-/* Pop Buttons & Cards from Nagarik_AI_frontend */
+/* ========================================================================== */
+/* KASIREDDY-RAGHAVENDRA LIGHT SAFFRON BUTTONS & CARDS                       */
+/* ========================================================================== */
+
+/* 1. Signature Light Saffron Pop CTA */
+.hover-pop-btn-saffron {
+  background: linear-gradient(135deg, #ffdbcb 0%, #ffb692 45%, #E58C5C 100%);
+  color: #0B0C1E;
+  font-weight: 700;
+  box-shadow: 0 4px 16px -2px rgba(229, 140, 92, 0.4),
+              inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 219, 203, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+.hover-pop-btn-saffron:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 26px -2px rgba(229, 140, 92, 0.55),
+              0 0 16px rgba(255, 182, 146, 0.45);
+  filter: brightness(1.03);
+}
+.hover-pop-btn-saffron:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 2px 6px rgba(229, 140, 92, 0.3);
+}
+
+/* Backward compatibility for orange button class */
 .hover-pop-btn-orange {
+  background: linear-gradient(135deg, #ffdbcb 0%, #ffb692 45%, #E58C5C 100%);
+  color: #0B0C1E;
+  font-weight: 700;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 .hover-pop-btn-orange:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 24px -2px rgba(242, 202, 80, 0.35);
+  box-shadow: 0 8px 24px -2px rgba(229, 140, 92, 0.45), 0 0 12px rgba(255, 182, 146, 0.35);
+}
+.hover-pop-btn-orange:active {
+  transform: translateY(1px) scale(0.97);
 }
 
+/* 2. Slate Pill Button with Saffron Rim */
 .hover-pop-btn-slate {
+  background: #1a1d24;
+  border: 1px solid rgba(229, 140, 92, 0.35);
+  color: #ffb692;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  user-select: none;
 }
 .hover-pop-btn-slate:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px -2px rgba(47, 53, 88, 0.65), 0 0 10px rgba(184, 100, 58, 0.2);
+  border-color: #ffb692;
+  color: #ffffff;
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.65), 0 0 14px rgba(229, 140, 92, 0.25);
+}
+.hover-pop-btn-slate:active {
+  transform: translateY(1px) scale(0.97);
 }
 
+/* 3. Consultation Prompt Cards */
 .hover-pop-card {
+  background-color: #16191f;
+  border: 1px solid #22262f;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 .hover-pop-card:hover {
   transform: translateY(-2px);
   background-color: #1e2330 !important;
-  border-color: #f2ca50 !important;
-  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.6), 0 0 12px rgba(242, 202, 80, 0.2);
+  border-color: #ffb692 !important;
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.6), 0 0 16px rgba(255, 182, 146, 0.25);
+}
+.hover-pop-card:active {
+  transform: translateY(1px) scale(0.98);
+}
+.hover-pop-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 182, 146, 0.08) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.hover-pop-card:hover::after {
+  opacity: 1;
 }
 
+/* 4. Input Bar Light Saffron Glow */
 .input-bar-glow {
+  background: #16191f;
+  border: 1px solid #22262f;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .input-bar-glow:hover, .input-bar-glow:focus-within {
-  border-color: #f2ca50 !important;
-  box-shadow: 0 0 20px rgba(242, 202, 80, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  border-color: #ffb692 !important;
+  box-shadow: 0 0 22px rgba(255, 182, 146, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.6);
 }
 
-/* Streaming blinking cursor */
+/* Streaming blinking cursor in light saffron */
 .streaming-cursor {
   display: inline-block;
   width: 6px;
   height: 15px;
-  background-color: #f2ca50;
+  background-color: #ffb692;
   margin-left: 4px;
   vertical-align: middle;
   border-radius: 1px;
@@ -178,11 +259,11 @@ body {
   50% { opacity: 0; }
 }
 
-/* Prose Civic / Markdown styling with zero layout shift */
+/* Prose Civic / Markdown styling */
 .prose-civic, .prose-gov {
-  color: #e2e2e6;
-  font-size: 0.875rem;
-  line-height: 1.7;
+  color: #E8E9F2;
+  font-size: 0.885rem;
+  line-height: 1.72;
 }
 
 .prose-civic p, .prose-gov p {
@@ -191,7 +272,7 @@ body {
 
 .prose-civic h1, .prose-civic h2, .prose-civic h3,
 .prose-gov h1, .prose-gov h2, .prose-gov h3 {
-  color: #f2ca50;
+  color: #ffb692;
   font-weight: 700;
   margin-top: 1.1rem;
   margin-bottom: 0.4rem;
@@ -210,7 +291,7 @@ body {
 }
 
 .prose-civic em, .prose-gov em {
-  color: #ffb692;
+  color: #ffdbcb;
   font-style: italic;
 }
 
@@ -237,16 +318,16 @@ body {
   transition: color 0.15s ease;
 }
 .prose-civic a:hover, .prose-gov a:hover {
-  color: #f2ca50;
+  color: #ffffff;
 }
 
 .prose-civic blockquote, .prose-gov blockquote {
-  border-left: 3.5px solid #d4af37;
-  background: rgba(212, 175, 55, 0.08);
+  border-left: 3.5px solid #E58C5C;
+  background: rgba(229, 140, 92, 0.08);
   padding: 0.5rem 0.85rem;
   border-radius: 0 8px 8px 0;
   margin: 0.75rem 0;
-  color: #e2e2e6;
+  color: #E8E9F2;
 }
 
 /* Beautiful responsive markdown tables */
@@ -274,7 +355,7 @@ body {
 .prose-civic td, .prose-gov td {
   padding: 8px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: #e2e2e6;
+  color: #E8E9F2;
 }
 
 .prose-civic tr:last-child td, .prose-gov tr:last-child td {
@@ -288,13 +369,10 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.82em;
-  color: #f2ca50;
+  color: #ffb692;
 }
 
-/* ========================================================================== */
-/* NAGARIK SPECIAL EFFECTS & ANIMATIONS                                      */
-/* ========================================================================== */
-
+/* Soundwave and Pulsing animations */
 @keyframes soundwave-bar {
   0%, 100% { height: 4px; }
   50% { height: 14px; }
@@ -310,17 +388,17 @@ body {
   animation: soundwave-bar 0.8s ease-in-out infinite 0.4s;
 }
 
-@keyframes aura-glow {
+@keyframes saffron-aura {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(242, 202, 80, 0.15), inset 0 0 10px rgba(242, 202, 80, 0.05);
+    box-shadow: 0 0 15px rgba(255, 182, 146, 0.2), inset 0 0 10px rgba(229, 140, 92, 0.08);
   }
   50% {
-    box-shadow: 0 0 28px rgba(242, 202, 80, 0.35), inset 0 0 16px rgba(242, 202, 80, 0.12);
+    box-shadow: 0 0 28px rgba(255, 182, 146, 0.45), inset 0 0 16px rgba(229, 140, 92, 0.18);
   }
 }
 
-.aura-glow {
-  animation: aura-glow 3s infinite ease-in-out;
+.saffron-aura {
+  animation: saffron-aura 3s infinite ease-in-out;
 }
 
 @keyframes slide-in-smooth {
@@ -344,24 +422,299 @@ body {
               opacity 0.25s ease-in-out;
 }
 
-/* Subtle holographic card hover sheen */
-.hover-pop-card {
+/* ========================================================================== */
+/* ULTRA-LUXURY SPECIAL EFFECTS & EXTENDABLE BUTTONS                          */
+/* ========================================================================== */
+
+/* Shimmer Sweep Animation */
+.shimmer-sweep {
   position: relative;
   overflow: hidden;
 }
-.hover-pop-card::after {
+.shimmer-sweep::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -150%;
+  width: 100%;
+  height: 200%;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 219, 203, 0.35) 50%,
+    transparent 80%
+  );
+  transform: rotate(25deg);
+  transition: all 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.shimmer-sweep:hover::before {
+  left: 150%;
+}
+
+/* Extendable Button Physics */
+.btn-extendable {
+  position: relative;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-extendable:hover {
+  transform: translateY(-2px);
+}
+.btn-extendable:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+/* Spacious Luxury Scheme Cards */
+.card-spacious-glow {
+  background: linear-gradient(145deg, rgba(22, 26, 36, 0.85) 0%, rgba(16, 19, 27, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.card-spacious-glow:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 182, 146, 0.55);
+  box-shadow: 0 20px 42px -10px rgba(0, 0, 0, 0.75),
+              0 0 26px rgba(255, 182, 146, 0.18),
+              inset 0 1px 0 rgba(255, 219, 203, 0.2);
+}
+.card-spacious-glow:active {
+  transform: translateY(1px) scale(0.98);
+}
+.card-spacious-glow::after {
   content: '';
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(242, 202, 80, 0.06) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(255, 182, 146, 0.09) 0%, transparent 60%);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.35s ease;
   pointer-events: none;
 }
-.hover-pop-card:hover::after {
+.card-spacious-glow:hover::after {
   opacity: 1;
 }
 
+/* Luxury Menu Pill */
+.pill-luxury-menu {
+  background: rgba(26, 31, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.875rem;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.pill-luxury-menu:hover {
+  background: rgba(35, 42, 58, 0.95);
+  border-color: rgba(255, 182, 146, 0.5);
+  transform: translateX(4px);
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.5),
+              0 0 14px rgba(255, 182, 146, 0.16);
+}
+.pill-luxury-menu:active {
+  transform: scale(0.98);
+}
+
+/* ========================================================================== */
+/* RAY-TRACED ADJACENT SPECULAR LIGHTING & REFLECTION ENGINE                 */
+/* ========================================================================== */
+
+/* Sibling direct adjacent reflection for menu pills */
+.pill-luxury-menu {
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pill-luxury-menu:hover {
+  background: rgba(38, 46, 64, 0.95) !important;
+  border-color: rgba(255, 182, 146, 0.65) !important;
+  box-shadow: 0 8px 26px -4px rgba(0, 0, 0, 0.7),
+              0 0 20px rgba(255, 182, 146, 0.22) !important;
+  transform: translateX(4px);
+  z-index: 2;
+}
+.pill-luxury-menu:hover + .pill-luxury-menu {
+  border-color: rgba(255, 182, 146, 0.35) !important;
+  background: rgba(30, 36, 50, 0.6) !important;
+  box-shadow: 0 -4px 16px -2px rgba(255, 182, 146, 0.15) !important;
+}
+.pill-luxury-menu:has(+ .pill-luxury-menu:hover) {
+  border-color: rgba(255, 182, 146, 0.35) !important;
+  background: rgba(30, 36, 50, 0.6) !important;
+  box-shadow: 0 4px 16px -2px rgba(255, 182, 146, 0.15) !important;
+}
+
+/* Sibling adjacent reflection for language buttons */
+.lang-btn-segment {
+  position: relative;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lang-btn-segment:hover + .lang-btn-segment {
+  background: rgba(255, 182, 146, 0.12) !important;
+  color: #ffdbcb !important;
+  box-shadow: -4px 0 14px -2px rgba(255, 182, 146, 0.25) !important;
+}
+.lang-btn-segment:has(+ .lang-btn-segment:hover) {
+  background: rgba(255, 182, 146, 0.12) !important;
+  color: #ffdbcb !important;
+  box-shadow: 4px 0 14px -2px rgba(255, 182, 146, 0.25) !important;
+}
+
+/* Ray-traced Adjacent Specular Spotlight for Scheme Cards */
+.spotlight-group {
+  position: relative;
+}
+
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Active & Adjacent Card Border Specular Highlight (bleeds onto neighbors) */
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: radial-gradient(
+    520px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+    rgba(255, 219, 203, 0.6) 0%,
+    rgba(255, 182, 146, 0.32) 35%,
+    transparent 65%
+  );
+  background-attachment: fixed;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+/* Active & Adjacent Card Surface Reflection */
+.spotlight-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    460px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+    rgba(255, 182, 146, 0.12) 0%,
+    rgba(229, 140, 92, 0.05) 40%,
+    transparent 65%
+  );
+  background-attachment: fixed;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.spotlight-group:hover .spotlight-card::before,
+.spotlight-group:hover .spotlight-card::after {
+  opacity: 1;
+}
+
+/* ========================================================================== */
+/* REAL-TIME 3D PERSPECTIVE, PARALLAX & FLUID AUDIO PHYSICS                   */
+/* ========================================================================== */
+
+.perspective-container {
+  perspective: 1200px;
+}
+
+.card-3d-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.parallax-layer-front {
+  transform: translateZ(26px);
+  transform-style: preserve-3d;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.parallax-layer-mid {
+  transform: translateZ(14px);
+  transform-style: preserve-3d;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.parallax-layer-back {
+  transform: translateZ(4px);
+}
+
+/* Magnetic Physics for CTA & Controls */
+.magnetic-btn {
+  will-change: transform;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.magnetic-btn:active {
+  transform: scale(0.94) !important;
+  transition: transform 0.08s ease-out;
+}
+
+/* Fluid Concentric Shockwave Ripples for Active Microphone */
+@keyframes shockwave-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.85;
+  }
+  60% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-shockwave-1 {
+  animation: shockwave-pulse 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.animate-shockwave-2 {
+  animation: shockwave-pulse 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite 0.7s;
+}
+.animate-shockwave-3 {
+  animation: shockwave-pulse 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite 1.4s;
+}
+
+/* ========================================================================== */
+/* PHYSICAL DIRECTIONAL ADJACENT REFLECTIONS (BUTTON-EMITTED LIGHT)           */
+/* ========================================================================== */
+
+.reflect-from-left {
+  border-left-color: rgba(255, 182, 146, 0.75) !important;
+  box-shadow: -8px 0 22px -2px rgba(255, 182, 146, 0.35) !important;
+  background: linear-gradient(90deg, rgba(255, 182, 146, 0.1) 0%, rgba(22, 26, 36, 0.85) 45%) !important;
+}
+
+.reflect-from-right {
+  border-right-color: rgba(255, 182, 146, 0.75) !important;
+  box-shadow: 8px 0 22px -2px rgba(255, 182, 146, 0.35) !important;
+  background: linear-gradient(270deg, rgba(255, 182, 146, 0.1) 0%, rgba(22, 26, 36, 0.85) 45%) !important;
+}
+
+.reflect-from-top {
+  border-top-color: rgba(255, 182, 146, 0.75) !important;
+  box-shadow: 0 -8px 22px -2px rgba(255, 182, 146, 0.35) !important;
+  background: linear-gradient(180deg, rgba(255, 182, 146, 0.1) 0%, rgba(22, 26, 36, 0.85) 45%) !important;
+}
+
+.reflect-from-bottom {
+  border-bottom-color: rgba(255, 182, 146, 0.75) !important;
+  box-shadow: 0 8px 22px -2px rgba(255, 182, 146, 0.35) !important;
+  background: linear-gradient(0deg, rgba(255, 182, 146, 0.1) 0%, rgba(22, 26, 36, 0.85) 45%) !important;
+}

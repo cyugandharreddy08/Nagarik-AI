@@ -14,6 +14,15 @@ import { AISaathiExtensionModal } from './components/AISaathiExtensionModal';
 import { CivicSettingsModal, type SettingsLanguage } from './components/CivicSettingsModal';
 import { CivicHelplineModal } from './components/CivicHelplineModal';
 import { speakCivicText, stopAllSpeech, deduplicateConsecutiveWords, mergeTranscripts, sanitizeCitizenPII, isMobileDevice } from './utils/civicAudioEngine';
+import {
+  playTactileClick,
+  playSendChime,
+  playMicOnSound,
+  playMicOffSound,
+  playActionSuccess,
+  isSoundMuted,
+  toggleSoundMute
+} from './utils/civicSoundEffects';
 
 // Civic Language Support
 export type CivicLanguage = 'en' | 'hi' | 'te' | 'ta';
@@ -61,10 +70,10 @@ export const NagarikEmblem: React.FC<{ className?: string; size?: number }> = ({
   if (retryFailed) {
     return (
       <svg className={className} width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="46" fill="#0c0e11" stroke="#f2ca50" strokeWidth="3" />
+        <circle cx="50" cy="50" r="46" fill="#0c0e11" stroke="#ffb692" strokeWidth="3" />
         <circle cx="50" cy="50" r="28" fill="#16191f" stroke="#ffb692" strokeWidth="2" strokeDasharray="3 3" />
-        <circle cx="50" cy="50" r="8" fill="#f2ca50" />
-        <path d="M50 12 L50 88 M12 50 L88 50 M23 23 L77 77 M23 77 L77 23" stroke="#f2ca50" strokeWidth="1.5" strokeOpacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ffb692" />
+        <path d="M50 12 L50 88 M12 50 L88 50 M23 23 L77 77 M23 77 L77 23" stroke="#ffb692" strokeWidth="1.5" strokeOpacity="0.8" />
       </svg>
     );
   }
@@ -85,6 +94,90 @@ export const NagarikEmblem: React.FC<{ className?: string; size?: number }> = ({
 };
 
 export function App() {
+  // Element-Emitted Physical Adjacent Reflection States
+  const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
+  const [hoveredLangIdx, setHoveredLangIdx] = useState<number | null>(null);
+  const [hoveredMenuIdx, setHoveredMenuIdx] = useState<number | null>(null);
+
+  // Calculate which facing edge of a card gets lit up by the currently hovered card
+  const getCardReflectionClass = (cardIdx: number, hoveredIdx: number | null): string => {
+    if (hoveredIdx === null || hoveredIdx === cardIdx) return '';
+    const reflections: string[] = [];
+    const isSameRow = Math.floor(hoveredIdx / 3) === Math.floor(cardIdx / 3);
+
+    // Left neighbor is lit -> Light casts onto this card's LEFT border
+    if (isSameRow && hoveredIdx === cardIdx - 1) {
+      reflections.push('reflect-from-left');
+    }
+    // Right neighbor is lit -> Light casts onto this card's RIGHT border
+    if (isSameRow && hoveredIdx === cardIdx + 1) {
+      reflections.push('reflect-from-right');
+    }
+    // Neighbor above is lit -> Light casts onto this card's TOP border
+    if (hoveredIdx === cardIdx - 3) {
+      reflections.push('reflect-from-top');
+    }
+    // Neighbor below is lit -> Light casts onto this card's BOTTOM border
+    if (hoveredIdx === cardIdx + 3) {
+      reflections.push('reflect-from-bottom');
+    }
+    return reflections.join(' ');
+  };
+
+  // Calculate adjacent reflection for language buttons (horizontal row of 3)
+  const getLangReflectionClass = (langIdx: number, hoveredIdx: number | null): string => {
+    if (hoveredIdx === null || hoveredIdx === langIdx) return '';
+    if (hoveredIdx === langIdx - 1) return 'reflect-from-left';
+    if (hoveredIdx === langIdx + 1) return 'reflect-from-right';
+    return '';
+  };
+
+  // Calculate adjacent reflection for menu pills (vertical stack of 4)
+  const getMenuReflectionClass = (menuIdx: number, hoveredIdx: number | null): string => {
+    if (hoveredIdx === null || hoveredIdx === menuIdx) return '';
+    if (hoveredIdx === menuIdx - 1) return 'reflect-from-top';
+    if (hoveredIdx === menuIdx + 1) return 'reflect-from-bottom';
+    return '';
+  };
+
+  // 3D Gyroscopic Tilt & Parallax Physics Handlers
+  const handleCardTiltMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+    e.currentTarget.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`;
+  };
+
+  const handleCardTiltLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  };
+
+  // Magnetic Cursor Physics Handlers
+  const handleMagneticMove = (e: React.MouseEvent<HTMLElement>, intensity: number = 0.2) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    e.currentTarget.style.transform = `translate(${(x * intensity).toFixed(1)}px, ${(y * intensity).toFixed(1)}px) scale(1.03)`;
+  };
+
+  const handleMagneticLeave = (e: React.MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.transform = 'translate(0px, 0px) scale(1)';
+  };
+
+  // Global Viewport Pointer Tracking for Physical Ray-Traced Adjacent Specular Reflections
+  useEffect(() => {
+    const handlePointerMove = (e: PointerEvent) => {
+      document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
+    };
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    return () => window.removeEventListener('pointermove', handlePointerMove);
+  }, []);
+
   // State: Language & Threads
   const [selectedLanguage, setSelectedLanguage] = useState<CivicLanguage>('en');
   const [threads, setThreads] = useState<ChatThread[]>(() => {
@@ -128,6 +221,7 @@ export function App() {
   });
 
   const toggleSidebarCollapsed = () => {
+    playTactileClick();
     setSidebarCollapsed(prev => {
       const next = !prev;
       localStorage.setItem('nagarik_sidebar_collapsed', next ? 'true' : 'false');
@@ -142,6 +236,13 @@ export function App() {
   const [isListening, setIsListening] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+
+  // Sound Effects
+  const [soundMuted, setSoundMuted] = useState<boolean>(() => isSoundMuted());
+  const handleToggleSound = () => {
+    const next = toggleSoundMute();
+    setSoundMuted(next);
+  };
 
   // Modals
   const [showExtensionModal, setShowExtensionModal] = useState(false);
@@ -237,6 +338,7 @@ export function App() {
 
   // Create New Thread
   const handleCreateNewThread = () => {
+    playTactileClick();
     const newId = 'thread_' + Date.now();
     const newSession = 'sess_' + Math.random().toString(36).substring(2, 10);
     const newThread: ChatThread = {
@@ -256,6 +358,7 @@ export function App() {
 
   // Delete Thread
   const handleDeleteThread = (e: React.MouseEvent, threadId: string) => {
+    playTactileClick();
     e.stopPropagation();
     const filtered = threads.filter(t => t.id !== threadId);
     if (filtered.length === 0) {
@@ -274,6 +377,7 @@ export function App() {
     stopAllSpeech();
 
     if (isListeningRef.current || isListening) {
+      playMicOffSound();
       isListeningRef.current = false;
       setIsListening(false);
       if (recognitionRef.current) {
@@ -287,6 +391,7 @@ export function App() {
       return;
     }
 
+    playMicOnSound();
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Voice typing is not supported in this browser. Please try Google Chrome, Microsoft Edge, or Safari.');
@@ -426,6 +531,7 @@ export function App() {
 
   // Copy Message to Clipboard
   const handleCopy = (id: string, text: string) => {
+    playActionSuccess();
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
@@ -450,6 +556,7 @@ export function App() {
 
     const query = (overrideQuery || inputQuery).trim();
     if (!query || isGenerating) return;
+    playSendChime();
 
     const currentThread = threads.find(t => t.id === activeThreadId);
     if (!currentThread) return;
@@ -676,6 +783,7 @@ export function App() {
   const [savedSchemeToast, setSavedSchemeToast] = useState<string | null>(null);
 
   const handleSaveCitationToBasta = (cite: SchemeCitation) => {
+    playActionSuccess();
     try {
       const existingStr = localStorage.getItem('nagarik_saved_schemes');
       const list = existingStr ? JSON.parse(existingStr) : [];
@@ -748,26 +856,26 @@ export function App() {
       {/* 1. LEFT SIDEBAR (COLLAPSIBLE / EXTENDABLE CONVERSATION HISTORY)   */}
       {/* ================================================================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#121418] border-r border-[#22262f] sidebar-transition md:static ${
-          sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72'
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#111318] border-r border-[#242938] sidebar-transition md:static ${
+          sidebarOpen ? 'translate-x-0 w-80' : '-translate-x-full w-80'
         } ${
           sidebarCollapsed
             ? 'md:w-0 md:opacity-0 md:border-none md:p-0 md:overflow-hidden md:pointer-events-none'
-            : 'md:w-72 md:opacity-100 md:translate-x-0'
+            : 'md:w-80 md:opacity-100 md:translate-x-0'
         }`}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#22262f] bg-[#16191f] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#1a1d24] border border-[#f2ca50]/40 shadow-inner p-0.5">
-              <NagarikEmblem className="w-8 h-8 rounded-full" size={32} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#1c2230] border border-[#E58C5C]/40 shadow-inner p-0.5">
+              <NagarikEmblem className="w-8 h-8 rounded-lg" size={32} />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="brand-serif italic font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#f2ca50] via-amber-200 to-[#ffb692]">
+                <span className="brand-serif italic font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ffdbcb] via-[#ffb692] to-[#E58C5C]">
                   Nagarik AI
                 </span>
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-[#f2ca50]/15 text-[#f2ca50] border border-[#f2ca50]/30 font-mono">
+                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-[#E58C5C]/15 text-[#ffb692] border border-[#E58C5C]/30 font-mono">
                   Sovereign
                 </span>
               </div>
@@ -782,9 +890,9 @@ export function App() {
                 setSidebarCollapsed(true);
                 try { localStorage.setItem('nagarik_sidebar_collapsed', 'true'); } catch {}
               }}
-              className="hidden md:flex p-1.5 rounded-lg text-[#8F93B5] hover:text-[#f2ca50] hover:bg-[#22262f] transition-colors"
-              title="Collapse conversation history (Alt+S)"
-              aria-label="Collapse History"
+              className="hidden md:flex p-1.5 rounded-lg text-[#8F93B5] hover:text-[#ffb692] hover:bg-[#22262f] transition-colors"
+              title="Collapse menu (Alt+S)"
+              aria-label="Collapse Menu"
             >
               <ChevronsLeft className="w-4 h-4" />
             </button>
@@ -799,19 +907,137 @@ export function App() {
           </div>
         </div>
 
-        {/* Start Fresh Conversation */}
+        {/* Start Fresh Conversation CTA */}
         <div className="p-3 shrink-0">
           <button
             onClick={handleCreateNewThread}
-            className="hover-pop-btn-orange w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f2ca50] to-[#ffb692] text-[#241a00] font-bold text-sm shadow-md hover:opacity-95 transition-all"
+            className="hover-pop-btn-saffron shimmer-sweep w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm shadow-lg group"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>New Conversation</span>
+            <div className="flex items-center gap-2">
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>New Consultation</span>
+            </div>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+
+        {/* ============================================================= */}
+        {/* CIVIC TOOLS & SERVICES (MOVED FROM TOP HEADER INTO MENU BAR)  */}
+        {/* ============================================================= */}
+        <div className="px-3 pb-3 space-y-2 shrink-0 border-b border-[#22262f]">
+          <div className="px-1 text-[10px] font-bold text-[#8F93B5] uppercase tracking-wider">
+            Civic Tools & Services
+          </div>
+
+          {/* 1. AI Saathi Browser Extension */}
+          <button
+            onClick={() => {
+              playTactileClick();
+              setShowExtensionModal(true);
+              if (window.innerWidth < 768) setSidebarOpen(false);
+            }}
+            onMouseEnter={() => setHoveredMenuIdx(0)}
+            onMouseLeave={() => setHoveredMenuIdx(null)}
+            className={`pill-luxury-menu w-full p-2.5 flex items-center justify-between text-left group transition-all duration-200 ${getMenuReflectionClass(0, hoveredMenuIdx)}`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[#221c18] border border-[#E58C5C]/40 flex items-center justify-center text-[#ffb692] group-hover:scale-110 transition-transform shrink-0">
+                <Monitor className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#E8E9F2] group-hover:text-[#ffb692] transition-colors truncate">
+                  AI Saathi Assistant
+                </div>
+                <div className="text-[10px] text-[#8F93B5] truncate">Browser autofill & guardian</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E58C5C]/15 text-[#ffb692] border border-[#E58C5C]/30 shrink-0">
+              Chrome
+            </span>
+          </button>
+
+          {/* 2. National Helplines (SOS / 24x7) */}
+          <button
+            onClick={() => {
+              playTactileClick();
+              setShowHelplineModal(true);
+              if (window.innerWidth < 768) setSidebarOpen(false);
+            }}
+            onMouseEnter={() => setHoveredMenuIdx(1)}
+            onMouseLeave={() => setHoveredMenuIdx(null)}
+            className={`pill-luxury-menu w-full p-2.5 flex items-center justify-between text-left group transition-all duration-200 ${getMenuReflectionClass(1, hoveredMenuIdx)}`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[#241717] border border-red-500/40 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform shrink-0">
+                <Phone className="w-4 h-4 animate-pulse" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#E8E9F2] group-hover:text-[#ffb692] transition-colors truncate">
+                  National Helplines
+                </div>
+                <div className="text-[10px] text-[#8F93B5] truncate">112 • 1930 • 181 • 1098</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
+              24x7 SOS
+            </span>
+          </button>
+
+          {/* 3. Tactile Sound Effects Audio Toggle */}
+          <button
+            onClick={handleToggleSound}
+            onMouseEnter={() => setHoveredMenuIdx(2)}
+            onMouseLeave={() => setHoveredMenuIdx(null)}
+            className={`pill-luxury-menu w-full p-2.5 flex items-center justify-between text-left group transition-all duration-200 ${getMenuReflectionClass(2, hoveredMenuIdx)}`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[#1c2230] border border-[#ffb692]/30 flex items-center justify-center text-[#ffb692] group-hover:scale-110 transition-transform shrink-0">
+                {soundMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4" />}
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#E8E9F2] group-hover:text-[#ffb692] transition-colors truncate">
+                  Sound Effects
+                </div>
+                <div className="text-[10px] text-[#8F93B5] truncate">Tactile acoustic haptics</div>
+              </div>
+            </div>
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold shrink-0 ${
+              soundMuted
+                ? 'bg-slate-800 text-slate-400 border border-slate-700'
+                : 'bg-[#E58C5C]/20 text-[#ffb692] border border-[#E58C5C]/40'
+            }`}>
+              {soundMuted ? 'Muted' : 'Active'}
+            </span>
+          </button>
+
+          {/* 4. Settings & Accessibility */}
+          <button
+            onClick={() => {
+              playTactileClick();
+              setShowSettingsModal(true);
+              if (window.innerWidth < 768) setSidebarOpen(false);
+            }}
+            onMouseEnter={() => setHoveredMenuIdx(3)}
+            onMouseLeave={() => setHoveredMenuIdx(null)}
+            className={`pill-luxury-menu w-full p-2.5 flex items-center justify-between text-left group transition-all duration-200 ${getMenuReflectionClass(3, hoveredMenuIdx)}`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[#1c2230] border border-white/10 flex items-center justify-center text-[#8F93B5] group-hover:text-[#ffb692] group-hover:scale-110 transition-transform shrink-0">
+                <Settings className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#E8E9F2] group-hover:text-[#ffb692] transition-colors truncate">
+                  Display & Privacy
+                </div>
+                <div className="text-[10px] text-[#8F93B5] truncate">Font size, contrast & history</div>
+              </div>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-[#8F93B5] group-hover:text-[#ffb692] group-hover:translate-x-1 transition-all shrink-0" />
           </button>
         </div>
 
         {/* Search Past Conversations */}
-        <div className="px-3 pb-2 shrink-0">
+        <div className="px-3 pt-3 pb-2 shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#8F93B5]" />
             <input
@@ -819,15 +1045,15 @@ export function App() {
               placeholder="Search conversations..."
               value={threadSearch}
               onChange={(e) => setThreadSearch(e.target.value)}
-              className="w-full bg-[#16191f] border border-[#22262f] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#e2e2e6] placeholder-[#8F93B5] focus:outline-none focus:border-[#f2ca50]/60"
+              className="w-full bg-[#16191f] border border-[#22262f] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#E8E9F2] placeholder-[#8F93B5] focus:outline-none focus:border-[#ffb692]/60"
             />
           </div>
         </div>
 
-        {/* Conversation Threads List (Simplified & Clean) */}
+        {/* Conversation Threads List */}
         <div className="flex-1 overflow-y-auto px-2 space-y-1 scrollbar-thin">
-          <div className="px-2 pt-2 pb-1 text-[11px] font-semibold text-[#8F93B5] uppercase tracking-wider flex items-center justify-between">
-            <span>Conversations</span>
+          <div className="px-2 pt-1 pb-1 text-[11px] font-semibold text-[#8F93B5] uppercase tracking-wider flex items-center justify-between">
+            <span>Past Consultations</span>
             <span className="text-[10px] bg-[#1a1d24] px-1.5 py-0.5 rounded text-[#8F93B5] font-mono">
               {filteredThreads.length}
             </span>
@@ -844,12 +1070,12 @@ export function App() {
                 }}
                 className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer text-xs transition-all ${
                   isActive
-                    ? 'bg-[#1a1d24] text-white font-medium border border-[#f2ca50]/40 shadow-sm'
-                    : 'text-[#8F93B5] hover:bg-[#16191f] hover:text-[#e2e2e6]'
+                    ? 'bg-[#1a1d24] text-white font-medium border border-[#E58C5C]/50 shadow-sm'
+                    : 'text-[#8F93B5] hover:bg-[#16191f] hover:text-[#E8E9F2]'
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
-                  <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#f2ca50]' : 'text-[#8F93B5]'}`} />
+                  <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#ffb692]' : 'text-[#8F93B5]'}`} />
                   <span className="truncate">{thread.title || 'Civic Consultation'}</span>
                 </div>
                 {threads.length > 1 && (
@@ -866,22 +1092,8 @@ export function App() {
           })}
         </div>
 
-        {/* Simplified Sidebar Footer */}
+        {/* Sidebar Footer */}
         <div className="p-3 border-t border-[#22262f] space-y-2 bg-[#101216] shrink-0">
-          <button
-            onClick={() => {
-              setSidebarOpen(false);
-              setShowExtensionModal(true);
-            }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold bg-[#1a1d24] border border-[#f2ca50]/40 text-[#f2ca50] hover:bg-[#22262f] transition-colors"
-          >
-            <div className="flex items-center gap-2.5">
-              <Monitor className="w-4 h-4 text-[#f2ca50]" />
-              <span>AI Saathi (Extension)</span>
-            </div>
-            <span className="text-[10px] bg-[#f2ca50]/20 px-1.5 py-0.5 rounded text-[#f2ca50] font-mono">Chrome</span>
-          </button>
-
           {threads.length > 1 && (
             <button
               onClick={() => {
@@ -901,7 +1113,7 @@ export function App() {
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
               Zero-Knowledge Architecture
             </span>
-            <span className="text-[#f2ca50] font-mono">Sovereign AI</span>
+            <span className="text-[#ffb692] font-mono">Sovereign AI</span>
           </div>
         </div>
       </aside>
@@ -919,106 +1131,66 @@ export function App() {
       {/* ================================================================= */}
       <main className="flex-1 flex flex-col h-full min-h-0 overflow-hidden bg-[#0c0e11] relative">
         {/* Top Minimal Sovereign Header - Fully Responsive on Mobile (< 640px) */}
-        <header className="flex items-center justify-between h-14 px-2 sm:px-4 border-b border-[#22262f] bg-[#101216]/90 backdrop-blur-xl shrink-0 overflow-hidden">
-          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-            {/* Sidebar Toggle Button (Always accessible to collapse and expand) */}
+        <header className="flex items-center justify-between h-14 px-3 sm:px-6 border-b border-[#22262f] bg-[#101216]/95 backdrop-blur-2xl shrink-0 overflow-hidden shadow-md">
+          {/* Left: Collapsible Menu Bar Toggle Button & Sovereign Copilot Identity */}
+          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             <button
               onClick={() => {
+                playTactileClick();
                 if (window.innerWidth < 768) {
                   setSidebarOpen(prev => !prev);
                 } else {
                   toggleSidebarCollapsed();
                 }
               }}
-              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 bg-[#1a1d24] border-[#f2ca50]/50 text-[#f2ca50] shadow-sm hover:border-[#f2ca50] hover:bg-[#22262f]"
-              title="Toggle Conversation History (Alt+S)"
-              aria-label="Toggle Conversation History"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#161922] border border-[#2a3040] hover:border-[#ffb692]/70 text-[#ffb692] shadow-sm transition-all active:scale-95 group cursor-pointer"
+              title="Open Menu & Civic Services (Alt+S)"
+              aria-label="Open Menu & Civic Services"
             >
-              {sidebarCollapsed ? (
-                <ChevronsRight className="w-4 h-4 text-[#f2ca50]" />
-              ) : (
-                <ChevronsLeft className="w-4 h-4 text-[#f2ca50]" />
-              )}
-              <span className="hidden sm:inline text-xs text-[#e2e2e6]">
-                {sidebarCollapsed ? 'History' : 'Collapse'}
-              </span>
+              <Menu className="w-4 h-4 text-[#ffb692] group-hover:rotate-90 transition-transform duration-300" />
+              <span className="hidden sm:inline text-xs font-semibold text-[#E8E9F2]">Menu</span>
               {threads.length > 0 && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#f2ca50]/20 text-[#f2ca50] font-mono">
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#E58C5C]/20 text-[#ffb692] font-mono">
                   {threads.length}
                 </span>
               )}
             </button>
 
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-semibold text-xs sm:text-sm text-[#e2e2e6] truncate max-w-[120px] xs:max-w-[180px] sm:max-w-xs md:max-w-md">
-                {currentThread?.title || 'Nagarik AI Copilot'}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <NagarikEmblem className="w-6 h-6 rounded-lg shrink-0" size={24} />
+              <span className="font-bold text-sm tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ffdbcb] via-[#ffb692] to-[#E58C5C]">
+                Nagarik AI
+              </span>
+              <span className="hidden md:inline text-xs text-[#8F93B5] border-l border-white/10 pl-2.5 truncate max-w-sm">
+                {currentThread?.title || 'Sovereign Civic Intelligence'}
               </span>
             </div>
           </div>
 
-          {/* Right Header Controls - Auto-fit for mobile screens */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            {/* AI Saathi Extension Button */}
-            <button
-              onClick={() => setShowExtensionModal(true)}
-              className="hover-pop-btn-slate flex items-center gap-1 sm:gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#1a1d24] border border-[#f2ca50]/40 text-[#f2ca50] hover:border-[#f2ca50] text-xs font-semibold shadow-sm transition-all shrink-0"
-              title="Open AI Saathi Browser Extension & Guardian (Alt+E)"
-              aria-label="AI Saathi Extension"
-            >
-              <Monitor className="w-3.5 h-3.5 text-[#f2ca50]" />
-              <span className="hidden md:inline">AI Saathi</span>
-            </button>
-
-            {/* National Helplines (SOS / 24x7) Button */}
-            <button
-              onClick={() => setShowHelplineModal(true)}
-              className="hover-pop-btn-slate flex items-center gap-1 sm:gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#1a1d24] border border-amber-500/40 text-amber-400 hover:border-amber-400 text-xs font-semibold shadow-sm transition-all shrink-0"
-              title="National Helplines (112, 1930, 181, 1912)"
-              aria-label="National Helplines"
-            >
-              <Phone className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden md:inline">Helplines</span>
-            </button>
-
-            {/* Preferences & Accessibility Settings Button */}
-            <button
-              onClick={() => setShowSettingsModal(true)}
-              className="hover-pop-btn-slate flex items-center gap-1 sm:gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#1a1d24] border border-[#22262f] text-[#8F93B5] hover:text-[#f2ca50] hover:border-[#f2ca50]/50 text-xs font-semibold shadow-sm transition-all shrink-0"
-              title="Settings & Accessibility"
-              aria-label="Settings"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Settings</span>
-            </button>
-
-            {/* Language Switcher */}
-            <div className="flex items-center bg-[#16191f] border border-[#22262f] rounded-lg p-0.5 text-xs shrink-0">
-              {(['en', 'hi', 'te'] as CivicLanguage[]).map(lang => (
+          {/* Right: ONLY THE LANGUAGE SWITCHER BUTTON (As Requested by Citizen) */}
+          <div className="flex items-center shrink-0">
+            <div className="flex items-center bg-[#13161f] border border-[#262c3a] rounded-xl p-1 text-xs shadow-inner">
+              {(['en', 'hi', 'te'] as CivicLanguage[]).map((lang, lIdx) => (
                 <button
                   key={lang}
-                  onClick={() => setSelectedLanguage(lang)}
-                  className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[11px] sm:text-xs font-medium transition-all ${
+                  onClick={() => {
+                    playTactileClick();
+                    setSelectedLanguage(lang);
+                  }}
+                  onMouseEnter={() => setHoveredLangIdx(lIdx)}
+                  onMouseLeave={() => setHoveredLangIdx(null)}
+                  className={`lang-btn-segment px-3 py-1 sm:px-3.5 sm:py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${getLangReflectionClass(lIdx, hoveredLangIdx)} ${
                     selectedLanguage === lang
-                      ? 'bg-[#f2ca50] text-[#241a00] font-bold shadow-sm'
-                      : 'text-[#8F93B5] hover:text-white'
+                      ? 'bg-gradient-to-r from-[#ffdbcb] via-[#ffb692] to-[#E58C5C] text-[#0B0C1E] font-bold shadow-md'
+                      : 'text-[#8F93B5] hover:text-[#ffb692]'
                   }`}
                   aria-label={`Switch language to ${lang === 'en' ? 'English' : lang === 'hi' ? 'Hindi' : 'Telugu'}`}
+                  data-lang-btn={lang}
                 >
                   {lang === 'en' ? 'EN' : lang === 'hi' ? 'हिंदी' : 'తెలుగు'}
                 </button>
               ))}
             </div>
-
-            {/* New Thread Button */}
-            <button
-              onClick={handleCreateNewThread}
-              className="flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#16191f] hover:bg-[#22262f] text-xs font-medium text-[#e2e2e6] border border-[#22262f] transition-colors shrink-0"
-              title="New Conversation (Alt+N)"
-              aria-label="New Conversation"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#f2ca50]" />
-              <span className="hidden sm:inline">New</span>
-            </button>
           </div>
         </header>
 
@@ -1030,68 +1202,53 @@ export function App() {
           <div className="max-w-3xl mx-auto space-y-6">
             {/* EMPTY STATE: Welcome Screen */}
             {messages.length === 0 && (
-              <div className="py-6 text-center space-y-8 animate-fade-in">
-                <div className="space-y-3">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#16191f] border border-[#B8643A]/50 shadow-lg shadow-black/60">
-                    <NagarikEmblem className="w-10 h-10" size={40} />
+              <div className="py-8 sm:py-12 text-center space-y-10 sm:space-y-14 animate-fade-in max-w-5xl mx-auto">
+                {/* Hero Header */}
+                <div className="space-y-4 max-w-2xl mx-auto">
+                  <div className="saffron-aura inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-[#161922] border border-[#E58C5C]/50 shadow-2xl">
+                    <NagarikEmblem className="w-12 h-12" size={48} />
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                  <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
                     {selectedLanguage === 'hi'
                       ? 'नमस्ते! आप किस योजना या सेवा की तलाश में हैं?'
                       : selectedLanguage === 'te'
                       ? 'నమస్కారం! మీరు ఏ ప్రభుత్వ పథకం లేదా సేవ కోసం చూస్తున్నారు?'
                       : 'Namaste! How can Nagarik AI assist you today?'}
                   </h1>
-                  <p className="text-sm text-[#8F93B5] max-w-lg mx-auto leading-relaxed">
+                  <p className="text-sm sm:text-base text-[#8F93B5] leading-relaxed">
                     {selectedLanguage === 'hi'
                       ? 'प्रमाणित केंद्रीय व राज्य योजनाओं, पात्रता नियमों और आधिकारिक सरकारी पोर्टलों की सटीक जानकारी।'
                       : selectedLanguage === 'te'
                       ? 'అధికారిక కేంద్ర మరియు రాష్ట్ర సంక్షేమ పథకాలు, అర్హత నిబంధనలు మరియు ప్రత్యక్ష ప్రయోజనాల సమాచారం.'
                       : 'Official Central & State Welfare Schemes, Eligibility Criteria & Direct Benefit Access.'}
                   </p>
-
-                  {/* Quick Feature Pills */}
-                  <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
-                    <button
-                      onClick={() => setShowExtensionModal(true)}
-                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16191f] border border-[#f2ca50]/40 text-xs font-semibold text-[#f2ca50] hover:bg-[#22262f] shadow-sm transition-all"
-                    >
-                      <Monitor className="w-3.5 h-3.5 text-[#f2ca50]" />
-                      <span>AI Saathi Browser Extension</span>
-                      <ArrowRight className="w-3 h-3 text-[#f2ca50]" />
-                    </button>
-
-                    <button
-                      onClick={() => setShowHelplineModal(true)}
-                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16191f] border border-amber-500/40 text-xs font-semibold text-amber-400 hover:bg-[#22262f] shadow-sm transition-all"
-                    >
-                      <Phone className="w-3.5 h-3.5 text-amber-400" />
-                      <span>24x7 National Helplines (SOS)</span>
-                      <ArrowRight className="w-3 h-3 text-amber-400" />
-                    </button>
-                  </div>
                 </div>
 
-                {/* 6 Clean Prompt Cards from Nagarik_AI_frontend */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
+                {/* THE SIX SCHEMES: 3D GYROSCOPIC TILT, PARALLAX & ADJACENT SPECULAR REFLECTION */}
+                <div className="spotlight-group perspective-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7 lg:gap-8 text-left pt-2">
                   {promptCards.map((card, idx) => (
                     <button
                       key={idx}
-                      onClick={() => handleSendChat(card.query)}
-                      className="hover-pop-card group flex flex-col justify-between p-4 rounded-xl bg-[#16191f] border border-[#22262f] hover:border-[#f2ca50]/50 hover:bg-[#1e2330] transition-all text-left shadow-sm"
+                      onClick={() => { playTactileClick(); handleSendChat(card.query); }}
+                      onMouseMove={handleCardTiltMove}
+                      onMouseEnter={() => setHoveredCardIndex(idx)}
+                      onMouseLeave={(e) => { handleCardTiltLeave(e); setHoveredCardIndex(null); }}
+                      className={`card-spacious-glow spotlight-card card-3d-tilt group flex flex-col justify-between p-6 sm:p-7 min-h-[185px] text-left transition-all duration-300 ${getCardReflectionClass(idx, hoveredCardIndex)}`}
                     >
-                      <div className="space-y-1">
-                        <div className="text-2xl mb-1">{card.icon}</div>
-                        <h2 className="font-semibold text-sm text-[#e2e2e6] group-hover:text-[#f2ca50] transition-colors">
+                      <div className="space-y-3 parallax-layer-front">
+                        <div className="w-12 h-12 rounded-2xl bg-[#1c2230] border border-[#ffb692]/25 flex items-center justify-center text-2xl shadow-inner group-hover:scale-115 group-hover:border-[#ffb692]/60 transition-all duration-300">
+                          {card.icon}
+                        </div>
+                        <h2 className="font-bold text-base text-[#E8E9F2] group-hover:text-[#ffb692] transition-colors tracking-tight">
                           {card.title}
                         </h2>
-                        <p className="text-xs text-[#8F93B5] leading-relaxed line-clamp-2">
+                        <p className="text-xs sm:text-[13px] text-[#8F93B5] leading-relaxed line-clamp-2 parallax-layer-mid">
                           {card.desc}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 mt-3 text-[11px] font-medium text-[#f2ca50] opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>Ask now</span>
-                        <ArrowRight className="w-3 h-3" />
+                      <div className="flex items-center gap-2 mt-5 text-xs font-semibold text-[#ffb692] group-hover:translate-x-2 transition-transform duration-300 parallax-layer-front">
+                        <span>Consult Scheme</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </div>
                     </button>
                   ))}
@@ -1143,7 +1300,7 @@ export function App() {
                         {/* Official Citations & Portals */}
                         {msg.citations && msg.citations.length > 0 && (
                           <div className="pt-3 border-t border-[#22262f] space-y-2">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#f2ca50]">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#ffb692]">
                               <Globe className="w-3.5 h-3.5" />
                               <span>Verified Official Portals:</span>
                             </div>
@@ -1151,21 +1308,21 @@ export function App() {
                               {msg.citations.map((cite, cIdx) => (
                                 <div
                                   key={cIdx}
-                                  className="inline-flex items-center rounded-lg bg-[#16191f] border border-[#22262f] hover:border-[#f2ca50]/60 transition-colors overflow-hidden"
+                                  className="inline-flex items-center rounded-lg bg-[#16191f] border border-[#22262f] hover:border-[#ffb692]/60 transition-colors overflow-hidden"
                                 >
                                   <a
                                     href={cite.official_url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#ffb692] hover:text-[#f2ca50] transition-colors"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#ffb692] hover:text-[#ffdbcb] transition-colors"
                                   >
                                     <span>{cite.name}</span>
                                     <ExternalLink className="w-3 h-3 text-[#8F93B5]" />
                                   </a>
                                   <button
                                     onClick={() => handleSaveCitationToBasta(cite)}
-                                    title="Save to Nagarik Basta (Document Locker)"
-                                    className="p-1.5 border-l border-[#22262f] text-[#8F93B5] hover:text-[#f2ca50] hover:bg-[#22262f] transition-colors"
+                                    title="Bookmark Scheme to Civic Dossier"
+                                    className="p-1.5 border-l border-[#22262f] text-[#8F93B5] hover:text-[#ffb692] hover:bg-[#22262f] transition-colors"
                                   >
                                     <Bookmark className="w-3.5 h-3.5" />
                                   </button>
@@ -1182,7 +1339,7 @@ export function App() {
                               <button
                                 key={fIdx}
                                 onClick={() => handleSendChat(followup)}
-                                className="px-2.5 py-1 rounded-full bg-[#1a1d24] border border-[#22262f] hover:border-[#f2ca50]/40 text-xs text-[#c5cfdb] hover:text-white transition-colors"
+                                className="px-2.5 py-1 rounded-full bg-[#1a1d24] border border-[#22262f] hover:border-[#ffb692]/40 text-xs text-[#c5cfdb] hover:text-white transition-colors"
                               >
                                 {followup}
                               </button>
@@ -1196,7 +1353,7 @@ export function App() {
                             onClick={() => handleToggleSpeak(msg.id, msg.content, msg.language)}
                             className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all ${
                               speakingId === msg.id
-                                ? 'bg-[#f2ca50]/15 text-[#f2ca50] border border-[#f2ca50]/30 shadow-sm'
+                                ? 'bg-[#ffb692]/15 text-[#ffb692] border border-[#ffb692]/30 shadow-sm'
                                 : 'hover:text-white hover:bg-[#16191f]'
                             }`}
                             title={speakingId === msg.id ? "Stop voice audio" : "Listen in authentic Telugu / Hindi / English"}
@@ -1204,11 +1361,11 @@ export function App() {
                             {speakingId === msg.id ? (
                               <>
                                 <div className="flex items-center gap-0.5 px-0.5 h-3.5">
-                                  <div className="w-0.5 bg-[#f2ca50] rounded-full animate-soundwave-1" />
-                                  <div className="w-0.5 bg-[#f2ca50] rounded-full animate-soundwave-2" />
-                                  <div className="w-0.5 bg-[#f2ca50] rounded-full animate-soundwave-3" />
+                                  <div className="w-0.5 bg-[#ffb692] rounded-full animate-soundwave-1" />
+                                  <div className="w-0.5 bg-[#ffb692] rounded-full animate-soundwave-2" />
+                                  <div className="w-0.5 bg-[#ffb692] rounded-full animate-soundwave-3" />
                                 </div>
-                                <span className="text-[#f2ca50] font-medium text-[11px]">Stop</span>
+                                <span className="text-[#ffb692] font-medium text-[11px]">Stop</span>
                               </>
                             ) : (
                               <>
@@ -1245,8 +1402,8 @@ export function App() {
 
             {/* Stable Live Reasoning Status (Zero layout shift) */}
             {isGenerating && (
-              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#16191f] border border-[#f2ca50]/30 max-w-md text-xs text-[#8F93B5]">
-                <div className="w-2 h-2 rounded-full bg-[#f2ca50] animate-ping" />
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#16191f] border border-[#ffb692]/30 max-w-md text-xs text-[#8F93B5]">
+                <div className="w-2 h-2 rounded-full bg-[#ffb692] animate-ping" />
                 <span className="truncate">{generationStep || 'Searching gazettes...'}</span>
               </div>
             )}
@@ -1263,24 +1420,36 @@ export function App() {
                 e.preventDefault();
                 handleSendChat();
               }}
-              className="input-bar-glow relative flex items-center bg-[#16191f] border border-[#22262f] rounded-2xl shadow-xl focus-within:border-[#f2ca50]/60 focus-within:ring-1 focus-within:ring-[#f2ca50]/30 transition-all"
+              className="input-bar-glow relative flex items-center bg-[#16191f] border border-[#22262f] rounded-2xl shadow-xl focus-within:border-[#ffb692]/70 focus-within:ring-1 focus-within:ring-[#ffb692]/30 transition-all"
             >
-              {/* Mic / Voice Search */}
+              {/* Mic / Voice Search with Concentric Shockwave Fluid Physics */}
               <button
                 type="button"
                 onClick={toggleListening}
-                className={`p-3 rounded-l-2xl transition-colors ${
+                onMouseMove={(e) => handleMagneticMove(e, 0.18)}
+                onMouseLeave={handleMagneticLeave}
+                className={`magnetic-btn relative p-3.5 rounded-l-2xl transition-all flex items-center justify-center ${
                   isListening
-                    ? 'text-red-500 animate-pulse bg-red-500/10'
-                    : 'text-[#8F93B5] hover:text-white'
+                    ? 'text-[#E58C5C] bg-[#E58C5C]/15 ring-2 ring-[#E58C5C]/40'
+                    : 'text-[#ffb692] hover:text-white hover:bg-white/5'
                 }`}
-                title={isListening ? 'Listening... speak now' : 'Voice typing'}
+                title={isListening ? 'Listening... Speak in Telugu, Hindi, or English (Click to stop)' : 'Voice typing'}
                 aria-label="Voice typing"
               >
-                {isListening ? <MicOff className="w-5 h-5 text-red-500" /> : <Mic className="w-5 h-5" />}
+                {isListening ? (
+                  <div className="relative flex items-center justify-center">
+                    {/* Concentric expanding fluid shockwave rings */}
+                    <span className="absolute w-8 h-8 rounded-full bg-[#E58C5C]/35 animate-shockwave-1" />
+                    <span className="absolute w-8 h-8 rounded-full bg-[#ffb692]/25 animate-shockwave-2" />
+                    <span className="absolute w-8 h-8 rounded-full bg-[#ffdbcb]/20 animate-shockwave-3" />
+                    <MicOff className="w-5 h-5 text-[#E58C5C] relative z-10" />
+                  </div>
+                ) : (
+                  <Mic className="w-5 h-5" />
+                )}
               </button>
 
-              {/* Text Input - 16px text-base on mobile prevents iOS viewport auto-zoom */}
+              {/* Text Input */}
               <input
                 ref={inputRef}
                 type="text"
@@ -1296,17 +1465,21 @@ export function App() {
                     : 'Ask about any government scheme, eligibility, or civic service...')
                 }
                 disabled={isGenerating}
-                className="flex-1 bg-transparent py-3 px-2 text-base sm:text-sm text-[#e2e2e6] placeholder-[#8F93B5] focus:outline-none disabled:opacity-50"
+                className="flex-1 bg-transparent py-3 px-2 text-base sm:text-sm text-[#E8E9F2] placeholder-[#8F93B5] focus:outline-none disabled:opacity-50"
               />
 
-              {/* Send Button */}
+              {/* Send Button with Magnetic Spring Attraction */}
               <button
                 type="submit"
                 disabled={!inputQuery.trim() || isGenerating}
-                className={`p-2.5 mr-1.5 rounded-xl transition-all ${
+                onMouseMove={(e) => {
+                  if (inputQuery.trim() && !isGenerating) handleMagneticMove(e, 0.22);
+                }}
+                onMouseLeave={handleMagneticLeave}
+                className={`magnetic-btn p-2.5 mr-2 rounded-xl transition-all ${
                   inputQuery.trim() && !isGenerating
-                    ? 'bg-gradient-to-r from-[#d4af37] via-[#f2ca50] to-[#ffb692] text-[#241a00] shadow-md hover:opacity-95 cursor-pointer font-bold'
-                    : 'text-[#3f3a2f] cursor-not-allowed'
+                    ? 'hover-pop-btn-saffron text-[#0B0C1E] shadow-lg cursor-pointer font-bold'
+                    : 'text-[#3f3a2f] cursor-not-allowed opacity-50'
                 }`}
                 title="Send message"
                 aria-label="Send message"
@@ -1357,8 +1530,8 @@ export function App() {
 
       {/* Toast Notification for Bookmarked Scheme */}
       {savedSchemeToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16191f] border border-[#f2ca50]/50 text-white text-xs font-semibold shadow-2xl animate-slide-smooth">
-          <Check className="w-4 h-4 text-[#f2ca50]" />
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16191f] border border-[#E58C5C]/50 text-white text-xs font-semibold shadow-2xl animate-slide-smooth">
+          <Check className="w-4 h-4 text-[#ffb692]" />
           <span>Saved to your civic dossier: <strong>{savedSchemeToast}</strong></span>
         </div>
       )}

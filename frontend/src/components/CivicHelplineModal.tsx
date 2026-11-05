@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { playTactileClick, playActionSuccess } from '../utils/civicSoundEffects';
 import {
   X, Phone, Shield, Zap, Droplets, Users, HeartHandshake,
   AlertTriangle, ExternalLink, Search, Check, Copy
@@ -146,6 +147,7 @@ export const CivicHelplineModal: React.FC<CivicHelplineModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopy = (num: string) => {
+    playActionSuccess();
     navigator.clipboard.writeText(num);
     setCopiedNumber(num);
     setTimeout(() => setCopiedNumber(null), 2000);
@@ -190,7 +192,7 @@ export const CivicHelplineModal: React.FC<CivicHelplineModalProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => { playTactileClick(); onClose(); }}
             className="p-1.5 rounded-lg text-[#8F93B5] hover:text-white hover:bg-[#22262f] transition-colors"
           >
             <X className="w-5 h-5" />
@@ -207,7 +209,7 @@ export const CivicHelplineModal: React.FC<CivicHelplineModalProps> = ({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search helpline name, number, or keyword..."
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-[#0c0e11] border border-[#22262f] text-[#e2e2e6] placeholder-[#8F93B5]/50 focus:outline-none focus:border-[#f2ca50]/70"
+                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-[#0c0e11] border border-[#22262f] text-[#e2e2e6] placeholder-[#8F93B5]/50 focus:outline-none focus:border-[#ffb692]/70"
               />
               <Search className="w-4 h-4 text-[#8F93B5] absolute left-3 top-2.5" />
             </div>
@@ -225,10 +227,10 @@ export const CivicHelplineModal: React.FC<CivicHelplineModalProps> = ({
               ].map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => setFilter(c.id)}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap text-xs ${
+                  onClick={() => { playTactileClick(); setFilter(c.id); }}
+                  className={`btn-tactile px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap text-xs ${
                     filter === c.id
-                      ? 'bg-[#f2ca50] text-[#0c0e11] shadow-sm'
+                      ? 'bg-[#ffb692] text-[#0c0e11] shadow-sm'
                       : 'bg-[#1a1d24] text-[#8F93B5] hover:text-[#e2e2e6]'
                   }`}
                 >
@@ -251,11 +253,11 @@ export const CivicHelplineModal: React.FC<CivicHelplineModalProps> = ({
               return (
                 <div
                   key={item.number}
-                  className="p-4 rounded-xl border border-[#22262f] bg-[#16191f] hover:border-[#f2ca50]/40 transition-all flex flex-col justify-between space-y-3"
+                  className="p-4 rounded-xl border border-[#22262f] bg-[#16191f] hover:border-[#ffb692]/40 transition-all flex flex-col justify-between space-y-3"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <span className="text-xl font-extrabold font-mono text-[#f2ca50] tracking-tight">
+                      <span className="text-xl font-extrabold font-mono text-[#ffb692] tracking-tight">
                         {item.number}
                       </span>
                       <div className="flex items-center gap-1.5">
@@ -278,14 +280,14 @@ export const CivicHelplineModal: React.FC<CivicHelplineModalProps> = ({
                   <div className="flex items-center gap-2 pt-2 border-t border-[#22262f]/80">
                     <a
                       href={`tel:${item.number}`}
-                      className="flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 transition-all shadow-sm"
+                      className="btn-tactile flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 transition-all shadow-sm"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       <span>Call {item.number}</span>
                     </a>
                     <button
                       onClick={() => handleCopy(item.number)}
-                      className="p-2 rounded-lg bg-[#22262f] text-[#8F93B5] hover:text-white transition-colors"
+                      className="btn-tactile p-2 rounded-lg bg-[#22262f] text-[#8F93B5] hover:text-white transition-colors"
                       title="Copy phone number"
                     >
                       {copiedNumber === item.number ? (
